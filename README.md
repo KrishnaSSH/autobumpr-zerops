@@ -40,6 +40,10 @@ If you don't have a credit card, you can:
 > If you create multiple zerops accounts and exploit them, you will be banned from Zerops.
 
 
+### Adding ENVs (Token and Channel ID)
+
+https://github.com/user-attachments/assets/ebaa888d-5e22-4fc0-8407-1256848056de
+
 ------
 
 ## Features
