@@ -54,8 +54,8 @@ If you don't have a credit card, you can:
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/autobumpr-v2.git
-cd autobumpr-v2
+git clone https://github.com/krishnassh/autobumper-zerops.git
+cd autobumper-zerops
 ```
 
 2. Install dependencies
