@@ -1,0 +1,10 @@
+zerops:
+  - setup: autobumpr
+    build:
+      base: nodejs@20
+      buildCommands:
+        - pnpm i
+      deployFiles: /
+    run:
+      base: nodejs@20
+      start: node index.js

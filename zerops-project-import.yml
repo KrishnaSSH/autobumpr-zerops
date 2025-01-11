@@ -1,0 +1,9 @@
+project:
+  name: discord-bots
+  tags:
+    - krishnassh
+
+services:
+  - hostname: autobumpr
+    type: nodejs@20
+    buildFromGit: https://github.com/krishnassh/autobumpr-zerops
