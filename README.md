@@ -79,7 +79,7 @@ pnpm start
 
 ## Credits
 
-This is a fork of [krishnaSSH/autobumpr-v2](https://github.com/krishnaSSH/autobumpr-v2) with additional features and improvements.
+This is a fork of [KrishnaSSH/autobumpr-v2](https://github.com/krishnaSSH/autobumpr-v2) with additional features and improvements.
 
 ## Important Notes
 
