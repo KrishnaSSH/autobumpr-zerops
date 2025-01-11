@@ -1,6 +1,6 @@
 # Autobumpr-v2
 
-A Discord selfbot that automatically bumps your server using Disboard and Discadia. Supports multiple accounts with alternating bump services.
+A Discord selfbot that automatically bumps your server using Disboard. Supports multiple accounts for frequent bumping.
 
 ## Import & Deploy on Zerops
 
@@ -44,7 +44,7 @@ If you don't have a credit card, you can:
 
 ## Features
 
-- Automatic bumping with Disboard (2h intervals) and Discadia (24h intervals)
+- Automatic bumping with Disboard (2h intervals)
 - Support for up to 5 different Discord accounts
 - Random delays to avoid detection
 - Environment-based configuration

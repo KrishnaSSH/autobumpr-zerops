@@ -1,9 +1,8 @@
 require('dotenv').config();
 const { Client } = require('discord.js-selfbot-v13');
 
-// Bot IDs for bump commands
+// Bot ID for Disboard bump command
 const DISBOARD_ID = '302050872383242240';
-const DISCADIA_ID = '1222548162741538938';
 
 function validateEnvironmentVariables() {
     let hasValidConfig = false;
@@ -32,28 +31,23 @@ function validateEnvironmentVariables() {
     }
 }
 
-async function bump(client, channelId, isDisboard) {
+async function bump(client, channelId) {
     const channel = await client.channels.fetch(channelId);
     
     try {
-        const commandId = isDisboard ? DISBOARD_ID : DISCADIA_ID;
-        await channel.sendSlash(commandId, 'bump');
-        console.count(`Bumped with ${isDisboard ? 'Disboard' : 'Discadia'} using ${client.user.tag}!`);
+        await channel.sendSlash(DISBOARD_ID, 'bump');
+        console.count(`Bumped with Disboard using ${client.user.tag}!`);
     } catch (error) {
         console.error(`Error bumping with ${client.user.tag}: ${error.message}`);
     }
 }
 
-function startBumping(client, channelId, isDisboard) {
-    // Random delay between bumps:
-    // Disboard: 2h to 2h15m
-    // Discadia: 24h to 25h
-    const randomTime = isDisboard
-        ? Math.floor(Math.random() * (15 * 60 * 1000)) + (2 * 60 * 60 * 1000)
-        : Math.floor(Math.random() * (25 * 60 * 60 * 1000)) + (24 * 60 * 60 * 1000);
+function startBumping(client, channelId) {
+    // Random delay between bumps: 2h to 2h15m
+    const randomTime = Math.floor(Math.random() * (15 * 60 * 1000)) + (2 * 60 * 60 * 1000);
 
-    bump(client, channelId, isDisboard);
-    setTimeout(() => startBumping(client, channelId, isDisboard), randomTime);
+    bump(client, channelId);
+    setTimeout(() => startBumping(client, channelId), randomTime);
 }
 
 try {
@@ -71,15 +65,12 @@ try {
     }
 
     // Start a client for each token
-    tokens.forEach(({ token, bump_channel }, index) => {
+    tokens.forEach(({ token, bump_channel }) => {
         const client = new Client();
 
         client.on('ready', () => {
             console.log(`Logged in as ${client.user.tag}!`);
-            
-            // Even indices use Disboard, odd indices use Discadia
-            const isDisboard = index % 2 === 0;
-            startBumping(client, bump_channel, isDisboard);
+            startBumping(client, bump_channel);
         });
 
         client.login(token).catch(err => {
