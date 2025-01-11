@@ -5,7 +5,19 @@ A Discord selfbot that automatically bumps your server using Disboard and Discad
 ## Import & Deploy on Zerops
 
 ### Option 1: One-Click Deploy
-Deploy autobumpr-v2 on Zerops with a single click and configure environment variables directly in the Zerops dashboard.
+```yaml
+project:
+  name: discord-bots
+  tags:
+    - krishnassh
+
+services:
+  - hostname: autobumpr
+    type: nodejs@20
+    buildFromGit: https://github.com/krishnassh/autobumpr-zerops
+```
+
+Import autobumpr-v2 on Zerops with a single click and configure environment variables directly in the Zerops dashboard.
 
 ### Cost Estimate
 - Pay $10 to deploy and run for 2+ years
@@ -15,7 +27,7 @@ Deploy autobumpr-v2 on Zerops with a single click and configure environment vari
 
 ### Alternative Payment
 If you don't have a credit card, you can:
-1. Join our Discord server
+1. Join our [Discord server](https://discord.gg/FC45ymTanp)
 2. Pay $10 via PayPal
 3. We'll help you set up your deployment
 
@@ -79,4 +91,4 @@ This is a fork of [krishnaSSH/autobumpr-v2](https://github.com/krishnaSSH/autobu
 
 For support, feature requests, or issues:
 - Open an issue on GitHub
-- Join our Discord server [link coming soon]
+- Join our [Discord server](https://discord.gg/FC45ymTanp).
