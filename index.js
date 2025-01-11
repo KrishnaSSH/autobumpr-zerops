@@ -1,10 +1,10 @@
 require('dotenv').config();
 const { Client } = require('discord.js-selfbot-v13');
 
+// Bot IDs for bump commands
 const DISBOARD_ID = '302050872383242240';
 const DISCADIA_ID = '1222548162741538938';
 
-// Add error checking at the start
 function validateEnvironmentVariables() {
     let hasValidConfig = false;
     const errors = [];
@@ -45,19 +45,21 @@ async function bump(client, channelId, isDisboard) {
 }
 
 function startBumping(client, channelId, isDisboard) {
+    // Random delay between bumps:
+    // Disboard: 2h to 2h15m
+    // Discadia: 24h to 25h
     const randomTime = isDisboard
-        ? Math.floor(Math.random() * (15 * 60 * 1000)) + (2 * 60 * 60 * 1000) // 2 to 2 hours 15 minutes
-        : Math.floor(Math.random() * (25 * 60 * 60 * 1000)) + (24 * 60 * 60 * 1000); // 24 to 25 hours
+        ? Math.floor(Math.random() * (15 * 60 * 1000)) + (2 * 60 * 60 * 1000)
+        : Math.floor(Math.random() * (25 * 60 * 60 * 1000)) + (24 * 60 * 60 * 1000);
 
     bump(client, channelId, isDisboard);
     setTimeout(() => startBumping(client, channelId, isDisboard), randomTime);
 }
 
-// Modified main execution code
 try {
     validateEnvironmentVariables();
 
-    // Load tokens and channels from environment variables
+    // Initialize tokens array from environment variables
     const tokens = [];
     for (let i = 1; i <= 5; i++) {
         const token = process.env[`DISCORD_TOKEN_${i}`];
@@ -68,14 +70,15 @@ try {
         }
     }
 
-    // Start clients for each token
+    // Start a client for each token
     tokens.forEach(({ token, bump_channel }, index) => {
         const client = new Client();
 
         client.on('ready', () => {
             console.log(`Logged in as ${client.user.tag}!`);
             
-            const isDisboard = index % 2 === 0; // Alternate between Disboard and Discadia
+            // Even indices use Disboard, odd indices use Discadia
+            const isDisboard = index % 2 === 0;
             startBumping(client, bump_channel, isDisboard);
         });
 
@@ -85,6 +88,6 @@ try {
     });
 
 } catch (error) {
-    console.error('\x1b[31m%s\x1b[0m', error.message); // Red error text
+    console.error('\x1b[31m%s\x1b[0m', error.message);
     process.exit(1);
 }
