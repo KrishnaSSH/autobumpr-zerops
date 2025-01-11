@@ -31,7 +31,7 @@ Import autobumpr-v2 on Zerops with a single click and configure environment vari
 
 ### Alternative Payment
 If you don't have a credit card, you can:
-1. Join our [Discord server](https://discord.gg/FC45ymTanp)
+1. Join our [Discord server](https://disboard.org/server/1191380825980293220)
 2. Pay $10 via PayPal
 3. We'll help you set up your deployment
 
@@ -99,4 +99,4 @@ This is a fork of [KrishnaSSH/autobumpr-v2](https://github.com/krishnaSSH/autobu
 
 For support, feature requests, or issues:
 - Open an issue on GitHub
-- Join our [Discord server](https://discord.gg/FC45ymTanp).
+- Join our [Discord server](https://disboard.org/server/1191380825980293220).
