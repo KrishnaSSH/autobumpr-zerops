@@ -31,54 +31,60 @@ function validateEnvironmentVariables() {
     }
 }
 
-async function bump(client, channelId) {
-    const channel = await client.channels.fetch(channelId);
+async function bumpWithClient(token, channelId) {
+    const client = new Client();
     
     try {
-        await channel.sendSlash(DISBOARD_ID, 'bump');
-        console.count(`Bumped with Disboard using ${client.user.tag}!`);
-    } catch (error) {
-        console.error(`Error bumping with ${client.user.tag}: ${error.message}`);
-    }
-}
-
-function startBumping(client, channelId) {
-    // Random delay between bumps: 2h to 2h15m
-    const randomTime = Math.floor(Math.random() * (15 * 60 * 1000)) + (2 * 60 * 60 * 1000);
-
-    bump(client, channelId);
-    setTimeout(() => startBumping(client, channelId), randomTime);
-}
-
-try {
-    validateEnvironmentVariables();
-
-    // Initialize tokens array from environment variables
-    const tokens = [];
-    for (let i = 1; i <= 5; i++) {
-        const token = process.env[`DISCORD_TOKEN_${i}`];
-        const bumpChannel = process.env[`BUMP_CHANNEL_${i}`];
+        await client.login(token);
+        console.log(`Logged in as ${client.user.tag}`);
         
-        if (token && bumpChannel) {
-            tokens.push({ token, bump_channel: bumpChannel });
-        }
+        const channel = await client.channels.fetch(channelId);
+        await channel.sendSlash(DISBOARD_ID, 'bump');
+        console.log(`Bumped successfully with ${client.user.tag}`);
+    } catch (error) {
+        console.error(`Error with token ${token.slice(0, 10)}...: ${error.message}`);
+    } finally {
+        // Always destroy the client to clean up
+        client.destroy();
     }
-
-    // Start a client for each token
-    tokens.forEach(({ token, bump_channel }) => {
-        const client = new Client();
-
-        client.on('ready', () => {
-            console.log(`Logged in as ${client.user.tag}!`);
-            startBumping(client, bump_channel);
-        });
-
-        client.login(token).catch(err => {
-            console.error(`Failed to login with token ${token.substring(0, 10)}....: ${err.message}`);
-        });
-    });
-
-} catch (error) {
-    console.error('\x1b[31m%s\x1b[0m', error.message);
-    process.exit(1);
 }
+
+async function startBumpLoop() {
+    try {
+        validateEnvironmentVariables();
+
+        // Get valid token/channel pairs
+        const pairs = [];
+        for (let i = 1; i <= 5; i++) {
+            const token = process.env[`DISCORD_TOKEN_${i}`];
+            const channelId = process.env[`BUMP_CHANNEL_${i}`];
+            if (token && channelId) {
+                pairs.push({ token, channelId });
+            }
+        }
+
+        while (true) {
+            console.log('Starting bump cycle...');
+            
+            // Process each account sequentially
+            for (const pair of pairs) {
+                await bumpWithClient(pair.token, pair.channelId);
+                // Wait 5 seconds between accounts
+                await new Promise(resolve => setTimeout(resolve, 5000));
+            }
+
+            // Wait 2 hours and 15 minutes before next cycle
+            console.log('Bump cycle complete. Waiting 2h15m before next cycle...');
+            await new Promise(resolve => setTimeout(resolve, 8100000));
+        }
+    } catch (error) {
+        console.error('\x1b[31m%s\x1b[0m', error.message);
+        process.exit(1);
+    }
+}
+
+// Start the bump loop
+startBumpLoop().catch(error => {
+    console.error('Fatal error in bump loop:', error);
+    process.exit(1);
+});
