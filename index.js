@@ -5,70 +5,68 @@ const { Client } = require('discord.js-selfbot-v13');
 const DISBOARD_ID = '302050872383242240';
 
 function validateEnvironmentVariables() {
-    let hasValidConfig = false;
-    const errors = [];
-
-    for (let i = 1; i <= 5; i++) {
-        const token = process.env[`DISCORD_TOKEN_${i}`];
-        const bumpChannel = process.env[`BUMP_CHANNEL_${i}`];
-        
-        if (token && !bumpChannel) {
-            errors.push(`BUMP_CHANNEL_${i} is missing for DISCORD_TOKEN_${i}`);
-        } else if (!token && bumpChannel) {
-            errors.push(`DISCORD_TOKEN_${i} is missing for BUMP_CHANNEL_${i}`);
-        } else if (token && bumpChannel) {
-            hasValidConfig = true;
-        }
+    const pairs = getAllConfigPairs();
+    
+    if (pairs.length === 0) {
+        throw new Error('No valid token and channel pairs found in .env file');
     }
 
-    if (!hasValidConfig) {
-        errors.unshift('No valid token and channel pairs found in .env file');
-        throw new Error('Environment Configuration Error:\n' + errors.join('\n'));
-    }
-
-    if (errors.length > 0) {
-        console.warn('Warning: Some configuration issues found:\n' + errors.join('\n'));
-    }
+    console.log(`Found ${pairs.length} valid token/channel pairs`);
+    return pairs;
 }
 
-async function bumpWithClient(token, channelId) {
+function getAllConfigPairs() {
+    const pairs = [];
+    let i = 1;
+
+    // Keep checking for tokens until we find one that doesn't exist
+    while (true) {
+        const token = process.env[`DISCORD_TOKEN_${i}`];
+        const channelId = process.env[`BUMP_CHANNEL_${i}`];
+
+        if (!token && !channelId) {
+            break; // Stop when we don't find any more pairs
+        }
+
+        if (token && channelId) {
+            pairs.push({ token, channelId, index: i });
+        } else {
+            console.warn(`Warning: Incomplete pair for index ${i}`);
+        }
+
+        i++;
+    }
+
+    return pairs;
+}
+
+async function bumpWithClient(token, channelId, index) {
     const client = new Client();
     
     try {
         await client.login(token);
-        console.log(`Logged in as ${client.user.tag}`);
+        console.log(`[Bot ${index}] Logged in as ${client.user.tag}`);
         
         const channel = await client.channels.fetch(channelId);
         await channel.sendSlash(DISBOARD_ID, 'bump');
-        console.log(`Bumped successfully with ${client.user.tag}`);
+        console.log(`[Bot ${index}] Bumped successfully with ${client.user.tag}`);
     } catch (error) {
-        console.error(`Error with token ${token.slice(0, 10)}...: ${error.message}`);
+        console.error(`[Bot ${index}] Error with token ${token.slice(0, 10)}...: ${error.message}`);
     } finally {
-        // Always destroy the client to clean up
         client.destroy();
     }
 }
 
 async function startBumpLoop() {
     try {
-        validateEnvironmentVariables();
-
-        // Get valid token/channel pairs
-        const pairs = [];
-        for (let i = 1; i <= 5; i++) {
-            const token = process.env[`DISCORD_TOKEN_${i}`];
-            const channelId = process.env[`BUMP_CHANNEL_${i}`];
-            if (token && channelId) {
-                pairs.push({ token, channelId });
-            }
-        }
+        const pairs = validateEnvironmentVariables();
 
         while (true) {
-            console.log('Starting bump cycle...');
+            console.log(`Starting bump cycle with ${pairs.length} bots...`);
             
             // Process each account sequentially
-            for (const pair of pairs) {
-                await bumpWithClient(pair.token, pair.channelId);
+            for (const { token, channelId, index } of pairs) {
+                await bumpWithClient(token, channelId, index);
                 // Wait 5 seconds between accounts
                 await new Promise(resolve => setTimeout(resolve, 5000));
             }
