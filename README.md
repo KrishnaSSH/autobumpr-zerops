@@ -19,7 +19,15 @@ services:
   - hostname: autobumpr
     type: nodejs@20
     buildFromGit: https://github.com/krishnassh/autobumpr-zerops
+    envSecrets:
+      DISCORD_TOKEN_1: MTI5NDQwMzgwODMwMjIwMjg5MAjfwhkfe214kj2
+      BUMP_CHANNEL_1: 837841234981489
+      DISCORD_TOKEN_2: MTI5NDQwMzgwODMwMjIwMjg5MAjfwhkfe214kj2
+      BUMP_CHANNEL_2: 837841234981489
+      # Add more pairs as needed (above envs are just examples)
 ```
+
+> Note: Make sure to add your tokens and channel ids in the envs section.
 
 Import autobumpr-v2 on Zerops with a single click and configure environment variables directly in the Zerops dashboard.
 
