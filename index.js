@@ -1,8 +1,9 @@
 require('dotenv').config();
 const { Client } = require('discord.js-selfbot-v13');
 
-// Bot ID for Disboard bump command
+// Bot IDs for bump commands
 const DISBOARD_ID = '302050872383242240';
+const DISCADIA_ID = '1222548162741538938';
 
 function validateEnvironmentVariables() {
     const pairs = getAllConfigPairs();
@@ -19,19 +20,14 @@ function getAllConfigPairs() {
     const pairs = [];
     let i = 1;
 
-    // Keep checking for tokens until we find one that doesn't exist
     while (true) {
         const token = process.env[`DISCORD_TOKEN_${i}`];
         const channelId = process.env[`BUMP_CHANNEL_${i}`];
 
-        if (!token && !channelId) {
-            break; // Stop when we don't find any more pairs
-        }
+        if (!token && !channelId) break;
 
         if (token && channelId) {
             pairs.push({ token, channelId, index: i });
-        } else {
-            console.warn(`Warning: Incomplete pair for index ${i}`);
         }
 
         i++;
@@ -40,49 +36,60 @@ function getAllConfigPairs() {
     return pairs;
 }
 
-async function bumpWithClient(token, channelId, index) {
+async function bumpServer(client, channelId, botId, botName) {
+    try {
+        const channel = await client.channels.fetch(channelId);
+        await channel.sendSlash(botId, 'bump');
+        console.log(`[${client.user.tag}] Bumped with ${botName} successfully`);
+    } catch (error) {
+        console.error(`[${client.user.tag}] Error bumping with ${botName}: ${error.message}`);
+    }
+}
+
+async function startBumpLoop(token, channelId, index) {
     const client = new Client();
     
     try {
         await client.login(token);
         console.log(`[Bot ${index}] Logged in as ${client.user.tag}`);
-        
-        const channel = await client.channels.fetch(channelId);
-        await channel.sendSlash(DISBOARD_ID, 'bump');
-        console.log(`[Bot ${index}] Bumped successfully with ${client.user.tag}`);
+
+        // Initial bumps
+        await bumpServer(client, channelId, DISBOARD_ID, 'Disboard');
+        await bumpServer(client, channelId, DISCADIA_ID, 'Discadia');
+
+        // Set up recurring bumps
+        setInterval(async () => {
+            await bumpServer(client, channelId, DISBOARD_ID, 'Disboard');
+        }, 2 * 60 * 60 * 1000 + Math.random() * 15 * 60 * 1000); // 2h + random 15min
+
+        setInterval(async () => {
+            await bumpServer(client, channelId, DISCADIA_ID, 'Discadia');
+        }, 24 * 60 * 60 * 1000 + Math.random() * 60 * 60 * 1000); // 24h + random 1h
+
     } catch (error) {
-        console.error(`[Bot ${index}] Error with token ${token.slice(0, 10)}...: ${error.message}`);
-    } finally {
+        console.error(`[Bot ${index}] Error: ${error.message}`);
         client.destroy();
     }
 }
 
-async function startBumpLoop() {
+async function main() {
     try {
         const pairs = validateEnvironmentVariables();
+        
+        // Start all bots concurrently
+        const promises = pairs.map(({ token, channelId, index }) => 
+            startBumpLoop(token, channelId, index)
+        );
 
-        while (true) {
-            console.log(`Starting bump cycle with ${pairs.length} bots...`);
-            
-            // Process each account sequentially
-            for (const { token, channelId, index } of pairs) {
-                await bumpWithClient(token, channelId, index);
-                // Wait 5 seconds between accounts
-                await new Promise(resolve => setTimeout(resolve, 5000));
-            }
-
-            // Wait 2 hours and 15 minutes before next cycle
-            console.log('Bump cycle complete. Waiting 2h15m before next cycle...');
-            await new Promise(resolve => setTimeout(resolve, 8100000));
-        }
+        await Promise.all(promises);
+        
     } catch (error) {
         console.error('\x1b[31m%s\x1b[0m', error.message);
         process.exit(1);
     }
 }
 
-// Start the bump loop
-startBumpLoop().catch(error => {
-    console.error('Fatal error in bump loop:', error);
+main().catch(error => {
+    console.error('Fatal error:', error);
     process.exit(1);
 });
