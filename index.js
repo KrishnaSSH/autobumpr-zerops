@@ -23,11 +23,20 @@ function getAllConfigPairs() {
     while (true) {
         const token = process.env[`DISCORD_TOKEN_${i}`];
         const channelId = process.env[`BUMP_CHANNEL_${i}`];
+        const useDiscadia = process.env[`USE_DISCADIA_${i}`] === 'TRUE';
 
         if (!token && !channelId) break;
 
         if (token && channelId) {
-            pairs.push({ token, channelId, index: i });
+            pairs.push({ 
+                token, 
+                channelId, 
+                index: i,
+                useDiscadia 
+            });
+            if (useDiscadia) {
+                console.log(`Bot ${i} has Discadia enabled`);
+            }
         }
 
         i++;
@@ -46,25 +55,48 @@ async function bumpServer(client, channelId, botId, botName) {
     }
 }
 
-async function startBumpLoop(token, channelId, index) {
-    const client = new Client();
+async function startBumpLoop(token, channelId, index, useDiscadia) {
+    const client = new Client({
+        checkUpdate: false,
+        autoRedeemNitro: false,
+        intents: [
+            'GUILDS',
+            'GUILD_MESSAGES',
+            'GUILD_MESSAGE_REACTIONS',
+            'DIRECT_MESSAGES'
+        ],
+        ws: {
+            properties: {
+                browser: 'Discord Client',
+                os: 'Windows',
+                device: 'Discord Client'
+            }
+        }
+    });
     
     try {
         await client.login(token);
         console.log(`[Bot ${index}] Logged in as ${client.user.tag}`);
 
-        // Initial bumps
+        // Initial Disboard bump
         await bumpServer(client, channelId, DISBOARD_ID, 'Disboard');
-        await bumpServer(client, channelId, DISCADIA_ID, 'Discadia');
+        
+        // Initial Discadia bump if enabled
+        if (useDiscadia) {
+            await bumpServer(client, channelId, DISCADIA_ID, 'Discadia');
+        }
 
-        // Set up recurring bumps
+        // Set up recurring Disboard bumps
         setInterval(async () => {
             await bumpServer(client, channelId, DISBOARD_ID, 'Disboard');
         }, 2 * 60 * 60 * 1000 + Math.random() * 15 * 60 * 1000); // 2h + random 15min
 
-        setInterval(async () => {
-            await bumpServer(client, channelId, DISCADIA_ID, 'Discadia');
-        }, 24 * 60 * 60 * 1000 + Math.random() * 60 * 60 * 1000); // 24h + random 1h
+        // Set up recurring Discadia bumps if enabled
+        if (useDiscadia) {
+            setInterval(async () => {
+                await bumpServer(client, channelId, DISCADIA_ID, 'Discadia');
+            }, 24 * 60 * 60 * 1000 + Math.random() * 60 * 60 * 1000); // 24h + random 1h
+        }
 
     } catch (error) {
         console.error(`[Bot ${index}] Error: ${error.message}`);
@@ -77,8 +109,8 @@ async function main() {
         const pairs = validateEnvironmentVariables();
         
         // Start all bots concurrently
-        const promises = pairs.map(({ token, channelId, index }) => 
-            startBumpLoop(token, channelId, index)
+        const promises = pairs.map(({ token, channelId, index, useDiscadia }) => 
+            startBumpLoop(token, channelId, index, useDiscadia)
         );
 
         await Promise.all(promises);
