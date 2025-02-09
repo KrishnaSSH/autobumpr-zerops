@@ -62,14 +62,12 @@ async function startBumpLoop() {
         const pairs = validateEnvironmentVariables();
 
         while (true) {
-            console.log(`Starting bump cycle with ${pairs.length} bots...`);
+            console.log(`Starting bump cycle with ${pairs.length} bots concurrently...`);
             
-            // Process each account sequentially
-            for (const { token, channelId, index } of pairs) {
-                await bumpWithClient(token, channelId, index);
-                // Wait 5 seconds between accounts
-                await new Promise(resolve => setTimeout(resolve, 5000));
-            }
+            // Process all accounts concurrently
+            await Promise.all(pairs.map(({ token, channelId, index }) => 
+                bumpWithClient(token, channelId, index)
+            ));
 
             // Wait 2 hours and 15 minutes before next cycle
             console.log('Bump cycle complete. Waiting 2h15m before next cycle...');
