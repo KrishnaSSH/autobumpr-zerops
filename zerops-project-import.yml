@@ -7,6 +7,7 @@ services:
   - hostname: autobumpr
     type: nodejs@20
     buildFromGit: https://github.com/krishnassh/autobumpr-zerops
+    
   - hostname: redis
     type: valkey@7.2
     mode: NON_HA
