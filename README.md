@@ -22,6 +22,7 @@ services:
     envSecrets:
       DISCORD_TOKEN_1: MTI5NDQwMzgwODMwMjIwMjg5MAjfwhkfe214kj2
       BUMP_CHANNEL_1: 837841234981489
+      USE_DISCADIA_1: TRUE
       DISCORD_TOKEN_2: MTI5NDQwMzgwODMwMjIwMjg5MAjfwhkfe214kj2
       BUMP_CHANNEL_2: 837841234981489
       # Add more pairs as needed (above envs are just examples)
