@@ -26,6 +26,11 @@ services:
       DISCORD_TOKEN_2: MTI5NDQwMzgwODMwMjIwMjg5MAjfwhkfe214kj2
       BUMP_CHANNEL_2: 837841234981489
       # Add more pairs as needed (above envs are just examples)
+
+  - hostname: redis
+    type: valkey@7.2
+    mode: NON_HA
+    priority: 10
 ```
 
 > Note: Make sure to add your tokens and channel ids in the envs section.
