@@ -1,5 +1,5 @@
 zerops:
-  - setup: mars
+  - setup: autobumpr
     build:
       base: nodejs@20
       buildCommands:
