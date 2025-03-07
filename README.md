@@ -10,11 +10,6 @@ https://github.com/user-attachments/assets/f7821a15-5fad-4561-8bcf-0d7f190f0e97
 
 ### Option 1: One-Click Deploy
 ```yaml
-project:
-  name: discord-bots
-  tags:
-    - krishnassh
-
 services:
   - hostname: autobumpr
     type: nodejs@20
